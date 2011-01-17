@@ -1,10 +1,5 @@
 from node import Node, Iterator
 
-#~ class DummyIterator:
-    #~ def __iter__(self):
-        #~ return self
-    #~ def __next__(self):
-        #~ return StopIteration
 
 class AVL:
     """Implementation of AVL tree with some additional features
@@ -28,20 +23,15 @@ class AVL:
     ################################################################
     def get_iterator_by_key(self, key):
         """Returns iterator representing first node with given key"""
-        if self.root:
-            return self.root.get_by_key(key)
-        else:
-            return Iterator(None)
+        result = self.get_iterator_by_closest_match(key)
+        return result if result.get_key() == key else Iterator(None)
 
     def get_iterator_by_position(self, n):
         """Returns iterator representing n-th key in whole tree
 
-        If n is <= 0 it returns first element
-        If n is greater than tree size then returns None"""
-        if not self.root or n > self.root.size:
+        If n >= tree size or n <= 0 then returns None"""
+        if n <= 0 or n > self.count():
             return Iterator(None)
-        if n <= 0:
-            n = 1
         return self.root.get_by_position(n)
 
     def get_iterator_by_closest_match(self, key):
@@ -49,46 +39,63 @@ class AVL:
 
         'Closest' means the previous one (or first element in a tree)
         For empty tree returns None exception"""
-        pass
+        if self.root:
+            return self.root.get_by_key(key)
+        return Iterator(None)
 
     ################################################################
     def get_value_by_key(self, key):
         """Returns value for a given key
 
         If tree doesn't contain key it returns None"""
-        result = self.get_iterator_by_key(key)
-        if result.current_node:
-            return result.current_node.value
-        return None
+        return self.get_iterator_by_key(key).get_value()
 
     def get_value_by_position(self, n):
         """Returns value for n-th key in the tree
 
         If n is <= 0 it returns first element
         If n is greater than tree size then returns None"""
-        result = self.get_iterator_by_position(n)
-        if result.current_node:
-            return result.current_node.value
-        return None
+        return self.get_iterator_by_position(n).get_value()
 
     def get_value_by_closest_match(self, key):
         """Same as get_value_by_key, but returns closest match if key's not found
 
         'Closest' means the previous one (or first element in a tree)
         For empty tree returns None"""
-        pass
+        return self.get_iterator_by_closest_match(key).get_value()
 
+    ################################################################
+    def modify_by_iterator(self, iterator, new_value):
+        if iterator.current_node:
+            iterator.current_node.value = new_value
+
+    def modify_by_key(self, key, new_value):
+        self.modify_by_iterator(self.get_iterator_by_key(key), new_value)
     ################################################################
     def count(self):
         """Size of the tree"""
         if self.root:
             return self.root.size
-        else:
-            return 0
+        return 0
 
-    def count(self, begin, end):
+    def get_closest_element_position(self, key):
+        element = self.get_iterator_by_closest_match(key).current_node
+        if not element:
+            return None
+        result = 1 + element.left.size if element.left else 1
+        while element.parent:
+            if element.parent.right == element:
+                result += element.parent.size - element.size
+            element = element.parent
+        return result
+
+    def count_subset(self, begin, end):
         """Return number of elements with key in [begin, end)"""
-        pass
+        left = self.get_closest_element_position(begin)
+        if not left:
+            return 0
+        right = self.get_closest_element_position(end)
+        return right - left if right else self.count() - left + 1
 
     ################################################################
     def remove_by_key(self, key):
@@ -101,6 +108,9 @@ class AVL:
         """Removes node which is represented by iterator"""
         pass
 
+    def clear(self):
+        self.root = None
     ################################################################
     def __iter__(self):
         return self.get_iterator_by_position(1)
+

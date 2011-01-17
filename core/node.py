@@ -12,9 +12,9 @@ class Node:
         if self.key == key:
             return Iterator(self)
         if key < self.key:
-            return self.left.get_by_key(key) if self.left else Iterator(None)
+            return self.left.get_by_key(key) if self.left else Iterator(self)
         else:
-            return self.right.get_by_key(key) if self.right else Iterator(None)
+            return self.right.get_by_key(key) if self.right else Iterator(self.next())
 
     def get_by_position(self, position):
         left_count = self.left.size if self.left else 0
@@ -49,6 +49,7 @@ class Node:
             tmp = tmp.parent
         return tmp.parent
 
+
 class Iterator:
     def __init__(self, node):
         self.current_node = node
@@ -61,5 +62,11 @@ class Iterator:
         if self.current_node:
             self.previous_node = self.current_node
             self.current_node = self.current_node.next()
-            return self.previous_node
+            return (self.previous_node.key, self.previous_node.value)
         raise StopIteration
+
+    def get_key(self):
+        return self.current_node.key if self.current_node else None
+
+    def get_value(self):
+        return self.current_node.value if self.current_node else None
