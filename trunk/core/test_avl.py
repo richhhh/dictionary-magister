@@ -9,7 +9,7 @@ class AVLTester(unittest.TestCase):
         #insert random permutation of [1, ..., 1000) list to avl tree
         ls = list(range(1, 1000))
         random.shuffle(ls)
-        for v, k in enumerate(ls):
+        for k, v in enumerate(ls):
             self.avl.insert(k, v + 1)
 
     def test_is_all(self):
