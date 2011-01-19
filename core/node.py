@@ -27,21 +27,24 @@ class Node:
     def insert(self, key, value):
         if key < self.key:
             if self.left:
-                self.left = self.left.insert(key, value)
+                self.left.insert(key, value)
             else:
                 self.left = Node(key, value, self)
         else:
             if self.right:
-                self.right = self.right.insert(key, value)
+                self.right.insert(key, value)
             else:
                 self.right = Node(key, value, self)
+        return self.balance()
+
+    def balance(self):
         if(self.calculate_balance() == -2):
             if self.right and self.right.calculate_balance() > 0:
-                self.right = self.right.rotate_right()
+                self.right.rotate_right()
             return self.rotate_left()
         if(self.calculate_balance() == 2):
             if self.left and self.left.calculate_balance() < 0:
-                self.left = self.left.rotate_left()
+                self.left.rotate_left()
             return self.rotate_right()
         self.update_data()
         return self
@@ -66,25 +69,27 @@ class Node:
         new_root = self.left
         self.left = new_root.right
         new_root.right = self
-        new_root.parent = self.parent
-        self.parent = new_root
         if self.left:
             self.left.parent = self
-        new_root.size = self.size
-        self.update_data()
-        new_root.update_data()
-        return new_root
+        return self.finish_rotation(new_root)
         
     def rotate_left(self):
         new_root = self.right
         self.right = new_root.left
         new_root.left = self
-        new_root.parent = self.parent
-        self.parent = new_root
         if self.right:
             self.right.parent = self
+        return self.finish_rotation(new_root)
+
+    def finish_rotation(self, new_root):
+        new_root.parent = self.parent
+        self.parent = new_root
         self.update_data()
         new_root.update_data()
+        if new_root.parent and new_root.parent.left == self:
+            new_root.parent.left = new_root
+        if new_root.parent and new_root.parent.right == self:
+            new_root.parent.right = new_root
         return new_root
 
     def next(self):
@@ -119,3 +124,7 @@ class Iterator:
 
     def get_value(self):
         return self.current_node.value if self.current_node else None
+
+    def modify(self, new_value):
+        if self.current_node:
+            self.current_node.value = new_value
