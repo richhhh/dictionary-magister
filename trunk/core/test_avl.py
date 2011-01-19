@@ -9,7 +9,7 @@ class AVLTester(unittest.TestCase):
         #insert random permutation of [1, ..., 1000) list to avl tree
         ls = list(range(1, 1000))
         random.shuffle(ls)
-        for k, v in enumerate(ls):
+        for v, k in enumerate(ls):
             self.avl.insert(k, v + 1)
 
     def test_is_all(self):
@@ -23,6 +23,10 @@ class AVLTester(unittest.TestCase):
         #tree iterator works fine
         all_values = {value for key, value in self.avl}
         self.assertSetEqual(all_values, test_set, "tree iterator fails")
+        
+        for k in range(1, 1000):
+            self.avl.remove_by_key(k)
+        self.assertTrue(self.avl.is_empty())
 
     def test_special_cases(self):
         self.assertIsNone(self.avl.get_value_by_key(-7))
@@ -39,6 +43,10 @@ class AVLTester(unittest.TestCase):
         self.assertEqual(self.avl.count_subset(997, 1001), 3)
         self.assertEqual(self.avl.count_subset(1001, 1002), 0)
         self.assertIsNone(self.avl.get_closest_element_position(10001))
+        self.avl.remove_by_key(-23)
+        self.avl.remove_by_key(1001)
+        self.avl.remove_by_iterator(self.avl.get_iterator_by_key(10001))
+        self.assertEqual(self.avl.count(), 999)
 
 class AVLTester2(unittest.TestCase):
     def setUp(self):
@@ -53,6 +61,7 @@ class AVLTester2(unittest.TestCase):
         self.avl.insert(121, 91)
         self.assertListEqual([78, 91, 19], [value for key, value in self.avl.get_iterator_by_key(111)])
         self.assertListEqual([78, 91, 19], [value for key, value in self.avl.get_iterator_by_position(4)])
+        self.assertEqual(self.avl.get_value_by_closest_match(91), 99)
         self.assertEqual(self.avl.get_value_by_closest_match(71), 99)
         self.assertEqual(self.avl.get_value_by_closest_match(95), 22)
         self.assertEqual(self.avl.get_closest_element_position(21), 1)
@@ -60,6 +69,11 @@ class AVLTester2(unittest.TestCase):
         self.avl.modify_by_key(111, 19)
         self.avl.modify_by_key(200, 21)
         self.assertEqual(self.avl.get_value_by_key(111), 19)
+        self.avl.remove_by_key(31)
+        self.avl.remove_by_key(99)
+        self.assertListEqual([v for k, v in self.avl], [99, 19, 91, 19])
+        self.assertIsNone(self.avl.get_value_by_key(31))
+        self.assertEqual(self.avl.get_value_by_closest_match(31), 99)
         self.avl.clear()
         self.assertIsNone(self.avl.get_value_by_closest_match(111))
 
